@@ -71,13 +71,14 @@ app.get('/videos', (_req, res) => {
 });
 
 app.get('/Videos/:id', (req, res) => {
+  const videoId = parseInt(req.params.id, 10);
   const video = db.videos.find((video) => video.id === +req.params.id);
 
-  if (!video) {
-    res.send("video for passed id doesn't exist").send(404);
-    return;
+  if (video) {
+    res.send(video).send(200);
+  } else {
+    res.status(404).send('video not found');
   }
-  res.status(200).send(video);
 });
 
 app.post('/videos', (req, res) => {
@@ -109,15 +110,15 @@ app.post('/videos', (req, res) => {
       field: 'author',
     });
   }
+  if (typeof req.body.canBeDownloaded !== 'boolean') {
+    errorsMessages.push({
+      message: 'canBeDownloaded',
+      field: 'canBeDownloaded',
+    });
+  }
   if (!('availableResolutions' in req.body)) {
     errorsMessages.push({
-      message: 'availableResolutions cannot be empty',
-      field: 'availableResolutions',
-    });
-  } else if (req.body.availableResolutions.length === 0) {
-    errorsMessages.push({
-      message:
-        'availableResolutions must have at least one available resolution',
+      message: 'availableResolutions are required',
       field: 'availableResolutions',
     });
   } else if (!Array.isArray(req.body.availableResolutions)) {
@@ -125,17 +126,34 @@ app.post('/videos', (req, res) => {
       message: 'availableResolutions must be an array',
       field: 'availableResolutions',
     });
-  }
-  if (errorsMessages.length > 0) {
-    res.status(400).json({ errorsMessages });
+  } else if (req.body.availableResolutions.length === 0) {
+    errorsMessages.push({
+      message: 'availableResolutions cannot be empty',
+      field: 'availableResolutions',
+    });
+  } else {
+    const validResolutions = Object.values(AvailableResolutionsEnum);
+    const invalidResolutions = req.body.availableResolutions.filter(
+      (res: AvailableResolutionsEnum) => !validResolutions.includes(res),
+    );
+    if (invalidResolutions.length > 0) {
+      errorsMessages.push({
+        message: `availabelResolutions has invalid data ${invalidResolutions.join(', ')}`,
+        field: 'availableResolutions',
+      });
+    }
   }
 
+  if (errorsMessages.length > 0) {
+    res.status(400).json({ errorsMessages });
+    return;
+  }
   const videoData = req.body;
   //тут плюс один день
   const newVideo = {
     id: Math.floor(Math.random() * 1000),
     ...videoData,
-    canBeDownloaded: false,
+    canBeDownloaded: req.body.canBeDownloaded ?? false,
     minAgeRestriction: 0,
     createdAt: setPublicationDate(videoData).createdAt,
     publicationDate: setPublicationDate(videoData).publicationDate,
@@ -152,11 +170,22 @@ app.put('/videos/:id', (req, res) => {
     res.status(404).send({
       errorsMessages: [{ message: 'video not found', field: 'video' }],
     });
+    return;
   }
   if (updateData.title !== undefined) {
     if (updateData.title.length > 40) {
       errorsMessages.push({
         message: 'title cannot be up to 40 symbols',
+        field: 'title',
+      });
+    } else if (typeof updateData.title !== 'string') {
+      errorsMessages.push({
+        message: 'title must be a string',
+        field: 'title',
+      });
+    } else if (typeof updateData.title === null) {
+      errorsMessages.push({
+        message: 'title must be a string',
         field: 'title',
       });
     }
@@ -166,6 +195,11 @@ app.put('/videos/:id', (req, res) => {
     if (updateData.author.length > 20) {
       errorsMessages.push({
         message: 'author cannot be up to 20 symbols',
+        field: 'author',
+      });
+    } else if (typeof updateData.author === null) {
+      errorsMessages.push({
+        message: 'author must be a string',
         field: 'author',
       });
     }
@@ -197,8 +231,17 @@ app.put('/videos/:id', (req, res) => {
       });
     }
   }
+  if (updateData.canBeDownloaded !== undefined) {
+    if (typeof updateData.canBeDownloaded !== 'boolean') {
+      errorsMessages.push({
+        message: 'canBeDownloaded must be a boolean',
+        field: 'canBeDownloaded',
+      });
+    }
+  }
   if (errorsMessages.length > 0) {
     res.status(400).json({ errorsMessages });
+    return;
   }
 
   if (video) {
@@ -217,11 +260,12 @@ app.put('/videos/:id', (req, res) => {
 });
 
 app.delete('/videos/:id', (req, res) => {
-  if (req.params.id !== req.params.id) {
-    res.send("video for passed id doesn't exist").send(404);
-    return;
+  const video = db.videos.find((video) => video.id === +req.params.id);
+  if (video) {
+    res.status(204).send('Video deleted');
+  } else {
+    res.status(404).send("video for passed id doesn't exist");
   }
-  res.status(204).send('Video deleted');
 });
 
 app.delete('/testing/all-data', (req, res) => {
