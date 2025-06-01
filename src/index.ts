@@ -110,12 +110,6 @@ app.post('/videos', (req, res) => {
       field: 'author',
     });
   }
-  if (typeof req.body.canBeDownloaded !== 'boolean') {
-    errorsMessages.push({
-      message: 'canBeDownloaded',
-      field: 'canBeDownloaded',
-    });
-  }
   if (!('availableResolutions' in req.body)) {
     errorsMessages.push({
       message: 'availableResolutions are required',
@@ -170,7 +164,6 @@ app.put('/videos/:id', (req, res) => {
     res.status(404).send({
       errorsMessages: [{ message: 'video not found', field: 'video' }],
     });
-    return;
   }
   if (updateData.title !== undefined) {
     if (updateData.title.length > 40) {
@@ -245,14 +238,9 @@ app.put('/videos/:id', (req, res) => {
   }
 
   if (video) {
-    const dataForUpdating = {
-      canBeDownloaded: req.body.canBeDownloaded ?? false,
-      minAgeRestriction: req.body.minAgeRestriction ?? video.minAgeRestriction,
-    };
     const updatedVideo = {
       ...video,
       ...updateData,
-      ...dataForUpdating,
     };
     db.videos = db.videos.map((v) => (v.id === video.id ? updatedVideo : v));
     res.status(204);
@@ -261,10 +249,10 @@ app.put('/videos/:id', (req, res) => {
 
 app.delete('/videos/:id', (req, res) => {
   const video = db.videos.find((video) => video.id === +req.params.id);
-  if (video) {
-    res.status(204).send('Video deleted');
+  if (!video) {
+    res.status(404).send('video for passed id doesnt exist');
   } else {
-    res.status(404).send("video for passed id doesn't exist");
+    res.status(204).send('Video deleted');
   }
 });
 
