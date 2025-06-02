@@ -242,6 +242,8 @@ app.put('/videos/:id', (req, res) => {
     const updatedVideo = {
       ...video,
       ...updateData,
+      createdAt: new Date(),
+      publicationDate: setPublicationDate(),
     };
     db.videos = db.videos.map((v) => (v.id === video.id ? updatedVideo : v));
     res.status(204);
