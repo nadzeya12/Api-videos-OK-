@@ -233,6 +233,14 @@ app.put('/videos/:id', (req, res) => {
       });
     }
   }
+  if (setPublicationDate() !== undefined) {
+    if (typeof setPublicationDate() !== 'string') {
+      errorsMessages.push({
+        message: 'publicationDate must be a string',
+        field: 'publicationDate',
+      });
+    }
+  }
   if (errorsMessages.length > 0) {
     res.status(400).json({ errorsMessages });
     return;
