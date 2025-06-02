@@ -1,7 +1,7 @@
 import 'express';
 import { setupApp } from './setup-app';
 import express from 'express';
-import { db } from './db';
+import { db, Video } from './db';
 
 const app = express();
 setupApp(app);
@@ -254,6 +254,8 @@ app.delete('/videos/:id', (req, res) => {
   if (!video) {
     res.status(404).send('video for passed id doesnt exist');
   } else {
+    //todo delete from db
+    db.videos = db.videos.filter((video: Video) => video.id !== video.id);
     res.status(204).send('Video deleted');
   }
 });
