@@ -70,11 +70,11 @@ app.get('/videos', (_req, res) => {
 });
 
 app.get('/videos/:id', (req, res) => {
-  const videoId = parseInt(req.params.id, 10);
+  // const videoId = parseInt(req.params.id, 10);
   const video = db.videos.find((video) => video.id === +req.params.id);
 
   if (video) {
-    res.send(video).send(200);
+    res.send(video).status(200);
   } else {
     res.status(404).send('video not found');
   }
@@ -167,9 +167,9 @@ app.put('/videos/:id', (req, res) => {
     });
   }
   if (updateData.title !== undefined) {
-    if (updateData.title.length > 40) {
+    if (typeof updateData.title === null) {
       errorsMessages.push({
-        message: 'title cannot be up to 40 symbols',
+        message: 'title must be a string',
         field: 'title',
       });
     } else if (typeof updateData.title !== 'string') {
@@ -177,9 +177,9 @@ app.put('/videos/:id', (req, res) => {
         message: 'title must be a string',
         field: 'title',
       });
-    } else if (typeof updateData.title === null) {
+    } else if (updateData.title.length > 40) {
       errorsMessages.push({
-        message: 'title must be a string',
+        message: 'title cannot be up to 40 symbols',
         field: 'title',
       });
     }
