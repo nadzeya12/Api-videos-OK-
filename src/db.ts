@@ -19,7 +19,7 @@ export type Video = {
   id: number;
   title: string;
   author: string;
-  minAgeRestriction: number;
+  minAgeRestriction: number | null;
   canBeDownloaded: boolean;
   createdAt: Date;
   publicationDate: Date;
@@ -33,7 +33,7 @@ export const db = {
       title: 'Video 1',
       author: 'John Doe',
       canBeDownloaded: false,
-      minAgeRestriction: 0,
+      minAgeRestriction: null,
       createdAt: new Date(),
       publicationDate: new Date(),
       availableResolutions: [AvailableResolutionsEnum.P2160],
@@ -43,7 +43,7 @@ export const db = {
       title: 'Video 2',
       author: 'Michael Dark',
       canBeDownloaded: true,
-      minAgeRestriction: 6,
+      minAgeRestriction: null,
       createdAt: new Date(),
       publicationDate: new Date(),
       availableResolutions: [AvailableResolutionsEnum.P1440],
@@ -53,7 +53,7 @@ export const db = {
       title: 'Video 3',
       author: 'Michael Dark',
       canBeDownloaded: true,
-      minAgeRestriction: 12,
+      minAgeRestriction: null,
       createdAt: new Date(),
       publicationDate: new Date(),
       availableResolutions: [AvailableResolutionsEnum.P1080],

@@ -148,7 +148,7 @@ app.post('/videos', (req, res) => {
     id: Math.floor(Math.random() * 1000),
     ...videoData,
     canBeDownloaded: req.body.canBeDownloaded ?? false,
-    minAgeRestriction: 0,
+    minAgeRestriction: null,
     createdAt: setPublicationDate(videoData).createdAt,
     publicationDate: setPublicationDate(videoData).publicationDate,
   };
@@ -245,6 +245,7 @@ app.put('/videos/:id', (req, res) => {
     db.videos = db.videos.map((v) => (v.id === video.id ? updatedVideo : v));
     res.status(204);
   }
+  res.send(errorsMessages);
 });
 
 app.delete('/videos/:id', (req, res) => {
