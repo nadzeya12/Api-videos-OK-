@@ -36,19 +36,18 @@ export type CreateVideoInputModel = {
   availableResolutions: AvailableResolutionsEnum[];
 };
 
-function setPublicationDate(
-  videoData: CreateVideoInputModel,
-): CreateVideoInputModel & { publicationDate: string; createdAt: string } {
+function setPublicationDate() {
   const createdAt = new Date().toISOString();
   const created = new Date(createdAt);
   if (!isNaN(created.getTime())) {
     const publication = new Date(created);
     publication.setDate(created.getDate() + 1);
-    return {
-      ...videoData,
-      publicationDate: publication.toISOString(),
-      createdAt,
-    };
+    return publication;
+    // return {
+    //   ...videoData,
+    //   publicationDate: publication.toISOString(),
+    //   createdAt,
+    // };
   } else {
     throw new Error('Invalid createdAt date');
   }
@@ -70,7 +69,7 @@ app.get('/videos', (_req, res) => {
   res.send(videos).status(200);
 });
 
-app.get('/Videos/:id', (req, res) => {
+app.get('/videos/:id', (req, res) => {
   const videoId = parseInt(req.params.id, 10);
   const video = db.videos.find((video) => video.id === +req.params.id);
 
@@ -149,8 +148,10 @@ app.post('/videos', (req, res) => {
     ...videoData,
     canBeDownloaded: req.body.canBeDownloaded ?? false,
     minAgeRestriction: null,
-    createdAt: setPublicationDate(videoData).createdAt,
-    publicationDate: setPublicationDate(videoData).publicationDate,
+    // createdAt: setPublicationDate(videoData).createdAt,
+    // publicationDate: setPublicationDate(videoData).publicationDate,
+    createdAt: new Date(),
+    publicationDate: setPublicationDate(),
   };
   db.videos.push(newVideo);
   res.status(201).send(newVideo);
