@@ -44,19 +44,6 @@ const isValidDate = (dateString: string | undefined): boolean => {
   const date = new Date(dateString);
   return !isNaN(date.getTime()); // Проверяем, что дата валидна
 };
-// todo function setPublicationDateUpdate(createdAt?: string): {
-//   publicationDate: string;
-// } {
-//   const created = createdAt ? new Date(createdAt) : new Date(); // По умолчанию текущая дата
-//   if (!isNaN(created.getTime())) {
-//     const publication = new Date(created);
-//     publication.setDate(created.getDate() + 1); // Сдвигаем дату на 1 день
-//     return { publicationDate: publication.toISOString() };
-//   } else {
-//     throw new Error('Invalid createdAt date');
-//   }
-// }
-
 function setPublicationDate() {
   const createdAt = new Date().toISOString();
   const created = new Date(createdAt);
@@ -178,7 +165,7 @@ app.post('/videos', (req, res) => {
   res.status(201).send(newVideo);
 });
 
-app.put('/videos/:id', (req, res, NextFunction) => {
+app.put('/videos/:id', (req, res) => {
   let video = db.videos.find((video) => video.id === +req.params.id);
   const updateData: Partial<UpdateVideoInputModel> = req.body;
   const errorsMessages = [];
@@ -206,7 +193,6 @@ app.put('/videos/:id', (req, res, NextFunction) => {
       });
     }
   }
-
   if (updateData.author !== undefined) {
     if (updateData.author.length > 20) {
       errorsMessages.push({
@@ -264,8 +250,6 @@ app.put('/videos/:id', (req, res, NextFunction) => {
     const updatedVideo = {
       ...video,
       ...updateData,
-      createdAt: new Date(),
-      publicationDate: setPublicationDate(),
     };
     db.videos = db.videos.map((v) => (v.id === video.id ? updatedVideo : v));
     res.status(204);
