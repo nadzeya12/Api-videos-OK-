@@ -175,7 +175,7 @@ app.put('/videos/:id', (req, res) => {
     });
   }
 
-  if (updateData.title) {
+  if (updateData.title !== undefined) {
     if (typeof updateData.title === null) {
       errorsMessages.push({
         message: 'title must be a string',
