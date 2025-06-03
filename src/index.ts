@@ -2,6 +2,7 @@ import 'express';
 import { setupApp } from './setup-app';
 import express from 'express';
 import { db, Video } from './db';
+import { isValidISODate } from './utils';
 
 const app = express();
 setupApp(app);
@@ -26,6 +27,7 @@ export type UpdateVideoInputModel = {
   availableResolutions: AvailableResolutionsEnum[];
   canBeDownloaded: boolean;
   minAgeRestriction: number;
+  publicationDate: string;
 };
 
 export type CreateVideoInputModel = {
@@ -156,8 +158,6 @@ app.post('/videos', (req, res) => {
     ...videoData,
     canBeDownloaded: req.body.canBeDownloaded ?? false,
     minAgeRestriction: null,
-    // createdAt: setPublicationDate(videoData).createdAt,
-    // publicationDate: setPublicationDate(videoData).publicationDate,
     createdAt: new Date(),
     publicationDate: setPublicationDate(),
   };
@@ -175,7 +175,7 @@ app.put('/videos/:id', (req, res) => {
     });
   }
 
-  if (updateData.title !== undefined) {
+  if (updateData.title) {
     if (typeof updateData.title === null) {
       errorsMessages.push({
         message: 'title must be a string',
@@ -241,6 +241,24 @@ app.put('/videos/:id', (req, res) => {
       });
     }
   }
+  if (updateData.publicationDate !== undefined) {
+    if (typeof updateData.canBeDownloaded !== 'boolean') {
+      errorsMessages.push({
+        message: 'canBeDownloaded must be a boolean',
+        field: 'canBeDownloaded',
+      });
+    }
+  }
+  if (
+    !updateData.publicationDate ||
+    typeof updateData.publicationDate !== 'string' ||
+    !isValidISODate(updateData.publicationDate)
+  ) {
+    errorsMessages.push({
+      message: 'publicationDate must be a string in ISO format',
+      field: 'publicationDate',
+    });
+  }
   if (errorsMessages.length > 0) {
     res.status(400).json({ errorsMessages });
     return;
@@ -250,6 +268,7 @@ app.put('/videos/:id', (req, res) => {
     const updatedVideo = {
       ...video,
       ...updateData,
+      publicationDate: new Date(updateData.publicationDate as string),
     };
     db.videos = db.videos.map((v) => (v.id === video.id ? updatedVideo : v));
     res.status(204);
