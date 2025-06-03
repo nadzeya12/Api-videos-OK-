@@ -241,14 +241,14 @@ app.put('/videos/:id', (req, res) => {
       });
     }
   }
-  if (updateData.publicationDate !== undefined) {
-    if (typeof updateData.canBeDownloaded !== 'boolean') {
-      errorsMessages.push({
-        message: 'canBeDownloaded must be a boolean',
-        field: 'canBeDownloaded',
-      });
-    }
-  }
+  // if (updateData.publicationDate !== undefined) {
+  //   if (typeof updateData.canBeDownloaded !== 'boolean') {
+  //     errorsMessages.push({
+  //       message: 'canBeDownloaded must be a boolean',
+  //       field: 'canBeDownloaded',
+  //     });
+  //   }
+  // }
   if (
     !updateData.publicationDate ||
     typeof updateData.publicationDate !== 'string' ||
